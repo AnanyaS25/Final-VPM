@@ -243,7 +243,6 @@
             <li><a href="https://lookerstudio.google.com/reporting/059ab9d2-6bd8-4845-8d47-0964edd54c36">Dashboard</a></li>
             <li><a href="https://docs.google.com/spreadsheets/d/1yHJaJLyy8EuhaCrl0UpBz3uv3nm62YyP8WRdUTFKNzA/edit?gid=1943085624#gid=1943085624">KPI Weightages</a></li>
             <li><a href="https://docs.google.com/spreadsheets/d/1yHJaJLyy8EuhaCrl0UpBz3uv3nm62YyP8WRdUTFKNzA/edit?gid=0#gid=0">Insights</a></li>
-            <li><a href="#">Price Comparison</a></li>
         </ul>
     </div>
     <div class="main-content">
@@ -282,7 +281,7 @@
                         <option value="dhu">DHU</option>
                         <option value="compliance">Compliance</option>
                         <option value="priceAdvantage">Price Advantage for Larger Quantity</option> 
-                        <option value="averagePurchasePrice">Average Purchase Price</option>
+                        <option value="averagePurchasePrice">Average Purchase Price(in Rs)</option>
                     </select>
                 </div>
                 <div>
@@ -498,6 +497,11 @@
                 <td>${vendor1[1]}</td>
                 <td>${vendor2[1]}</td>
             </tr>
+             <tr>
+                <td>Average Purchase Price</td>
+                <td>${vendor1[3]}</td>
+                <td>${vendor2[3]}</td>
+            </tr>
             <tr>
                 <td>Price Advantage for Larger Quantity</td>
                 <td>${vendor1[4]}</td>
@@ -509,9 +513,19 @@
                 <td>${vendor2[7]}</td>
             </tr>
             <tr>
+                <td>OTIF</td>
+                <td>${vendor1[7]}</td>
+                <td>${vendor2[7]}</td>
+            </tr>
+            <tr>
                 <td>First Time Pass</td>
                 <td>${vendor1[6]}</td>
                 <td>${vendor2[6]}</td>
+            </tr>
+            <tr>
+                <td>DHU</td>
+                <td>${vendor1[5]}</td>
+                <td>${vendor2[5]}</td>
             </tr>
               <tr>
                 <td>Order Fulfillment</td>
@@ -583,7 +597,7 @@
             <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Raw Score:</strong> ${vendor.rawScore}/${vendor.maxRawScore}</p>
             <p><strong>Location:</strong> ${vendor.location}</p>
             <p><strong>Categories:</strong> ${vendor.categories}</p>
-            <p><strong>Average Purchase Price:</strong> ${vendor.averagePurchasePrice}</p>
+            <p><strong>Average Purchase Price(in Rs):</strong> ${vendor.averagePurchasePrice}</p>
             <p><strong>Price Advantage:</strong> ${vendor.priceAdvantage}</p>
             <p><strong>DHU:</strong> ${vendor.dhu}</p>
             <p><strong>First Time Pass:</strong> ${vendor.firstTimePass}</p>
@@ -815,7 +829,7 @@ function showBestVendor() {
 
     // Display the best vendor
     suggestionsDiv.innerHTML = `
-        <p>Best vendor for ${kpi} in ${location} below ${range}%: <strong>${bestVendor[0]}</strong> (${bestVendor[kpiIndex]}%)</p>
+        <p>Best vendor for ${kpi} in ${location} below ${range}%: <strong>${bestVendor[0]}</strong> (${bestVendor[kpiIndex]})</p>
     `;
 }
     </script>
