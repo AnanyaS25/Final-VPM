@@ -188,6 +188,8 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
             padding: 20px;
             width: 300px;
+            max-height: 400px; /* Set a maximum height */
+            overflow-y: auto; /* Add vertical scrollbar if content exceeds max height */
             display: none;
             z-index: 1000;
         }
@@ -234,15 +236,34 @@
         body.dark-mode .popup .close-button {
             color: #ffffff;
         }
+
+        .info-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            padding: 5px 10px;
+            cursor: pointer;
+            margin-left: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .info-button:hover {
+            background-color: #0056b3;
+            transform: scale(1.1);
+        }
     </style>
 </head>
 <body>
     <div class="sidebar">
         <h2>Dashboard</h2>
         <ul>
-            <li><a href="https://lookerstudio.google.com/reporting/059ab9d2-6bd8-4845-8d47-0964edd54c36">Dashboard</a></li>
+            <li><a href="https://lookerstudio.google.com/reporting/059ab9d2-6bd8-4845-8d47-0964edd54c36"> Vendor Dashboard</a></li>
             <li><a href="https://docs.google.com/spreadsheets/d/1yHJaJLyy8EuhaCrl0UpBz3uv3nm62YyP8WRdUTFKNzA/edit?gid=1943085624#gid=1943085624">KPI Weightages</a></li>
             <li><a href="https://docs.google.com/spreadsheets/d/1yHJaJLyy8EuhaCrl0UpBz3uv3nm62YyP8WRdUTFKNzA/edit?gid=0#gid=0">Insights</a></li>
+            
         </ul>
     </div>
     <div class="main-content">
@@ -253,6 +274,7 @@
             <div class="header-right">
                 <div class="user-info">
                     <span>Welcome, <strong> Ananya </strong></span>
+                    <button class="info-button" onclick="toggleProjectScope()">ℹ</button> <!-- Info icon -->
                 </div>
                 <div class="notifications">
                     <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" title="Mail">
@@ -280,14 +302,13 @@
                         <option value="firstTimePass">First Time Pass</option>
                         <option value="dhu">DHU</option>
                         <option value="compliance">Compliance</option>
-                        <option value="priceAdvantage">Price Advantage for Larger Quantity</option> 
-                        <option value="averagePurchasePrice">Average Purchase Price(in Rs)</option>
+                        <option value="priceAdvantage">Price Advantage for Larger Quantity</option>
                     </select>
                 </div>
                 <div>
                     <label for="locationDropdown" style="font-weight: bold; display: block; text-align: center;">Select a Location:</label>
                     <select id="locationDropdown" class="styled-dropdown" onchange="showBestVendor()">
-                        <option value="" disabled selected>Select a Location</option>
+                        <option value="all" selected>All Locations</option>
                         <option value="Ludhiana">Ludhiana</option>
                         <option value="Tirrupur">Tirrupur</option>
                         <option value="Noida">Noida</option>
@@ -381,6 +402,18 @@
         <div id="chatResponse" class="comparison-results hidden"></div>
         <button class="styled-button" onclick="clearChatbotResponse()">Clear</button> <!-- Clear Button -->
     </div>
+
+    <!-- Modal for Project Scope -->
+<div id="projectScopeModal" class="hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); padding: 20px; width: 400px; z-index: 1000;">
+    <h3 style="margin-top: 0; color: #007bff;">Project Scope</h3>
+    <ul style="list-style-type: disc; padding-left: 20px;">
+        <li>Brand: Mast & Harbour</li>
+        <li>Category: Men's Crew Neck T-Shirts</li>
+        <li>Fabric Focus: Single Jersey and Interlock only</li>
+        <li>Other styles or categories are not included in this pilot version.</li>
+    </ul>
+    <button class="styled-button" onclick="toggleProjectScope()">Close</button>
+</div>
 
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
@@ -483,24 +516,29 @@
         </thead>
         <tbody>
             <tr>
-                <td>Final Score</td>
+                <td>Vendor Performance Score</td>
                 <td style="background-color: ${vendor1Score > vendor2Score ? '#d4edda' : ''};">${vendor1Score.toFixed(2)}</td>
                 <td style="background-color: ${vendor2Score > vendor1Score ? '#d4edda' : ''};">${vendor2Score.toFixed(2)}</td>
-            </tr>
-            <tr>
-                <td>Raw Score</td>
-                <td>${parseFloat(vendor1[11]).toFixed(2)}/${parseFloat(vendor1[12]).toFixed(2)}</td>
-                <td>${parseFloat(vendor2[11]).toFixed(2)}/${parseFloat(vendor2[12]).toFixed(2)}</td>
             </tr>
             <tr>
                 <td>Location</td>
                 <td>${vendor1[1]}</td>
                 <td>${vendor2[1]}</td>
             </tr>
-             <tr>
+            <tr>
                 <td>Average Purchase Price</td>
                 <td>${vendor1[3]}</td>
                 <td>${vendor2[3]}</td>
+            </tr>
+            <tr>
+                <td>OTIF</td>
+                <td>${vendor1[8]}</td>
+                <td>${vendor2[8]}</td>
+            </tr>
+            <tr>
+                <td>DHU</td>
+                <td>${vendor1[5]}</td>
+                <td>${vendor2[5]}</td>
             </tr>
             <tr>
                 <td>Price Advantage for Larger Quantity</td>
@@ -513,21 +551,11 @@
                 <td>${vendor2[7]}</td>
             </tr>
             <tr>
-                <td>OTIF</td>
-                <td>${vendor1[7]}</td>
-                <td>${vendor2[7]}</td>
-            </tr>
-            <tr>
                 <td>First Time Pass</td>
                 <td>${vendor1[6]}</td>
                 <td>${vendor2[6]}</td>
             </tr>
             <tr>
-                <td>DHU</td>
-                <td>${vendor1[5]}</td>
-                <td>${vendor2[5]}</td>
-            </tr>
-              <tr>
                 <td>Order Fulfillment</td>
                 <td>${vendor1[9]}</td>
                 <td>${vendor2[9]}</td>
@@ -547,7 +575,7 @@
     const message = document.createElement("p");
     message.style.fontWeight = "bold";
     message.style.color = "#007bff";
-    message.textContent = `The vendor with the better score is "${betterVendor}" with a final score of ${betterVendorScore.toFixed(2)}.`;
+    message.textContent = `The vendor with the better score is "${betterVendor}" with a Vendor Performance Score of ${betterVendorScore.toFixed(2)}.`;
     comparisonResults.appendChild(message);
 
     // Make the comparison results section visible
@@ -572,8 +600,6 @@
         firstTimePass: row[6], // First Time Pass
         onTimeDelivery: row[7], // On-Time Delivery
         compliance: row[10], // Compliance
-        rawScore: parseFloat(row[11]), // Raw Score (Column L)
-        maxRawScore: parseFloat(row[12]), // Max Raw Score (Column M)
         score: parseFloat(row[13]) // Final Score (Column N)
     }));
 
@@ -593,11 +619,10 @@
         // Assign rank based on the index (which is sorted)
         card.innerHTML = `
             <h3>Rank: ${index + 1} - ${vendor.name}</h3>
-            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Final Score:</strong> ${vendor.score.toFixed(2)}</p>
-            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Raw Score:</strong> ${vendor.rawScore}/${vendor.maxRawScore}</p>
+            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Vendor Performance Score:</strong> ${vendor.score.toFixed(2)}</p>
             <p><strong>Location:</strong> ${vendor.location}</p>
             <p><strong>Categories:</strong> ${vendor.categories}</p>
-            <p><strong>Average Purchase Price(in Rs):</strong> ${vendor.averagePurchasePrice}</p>
+            <p><strong>Average Purchase Price:</strong> ${vendor.averagePurchasePrice}</p>
             <p><strong>Price Advantage:</strong> ${vendor.priceAdvantage}</p>
             <p><strong>DHU:</strong> ${vendor.dhu}</p>
             <p><strong>First Time Pass:</strong> ${vendor.firstTimePass}</p>
@@ -645,8 +670,6 @@ function askChatbot() {
         const firstTimePass = vendor[6]; // First Time Pass (Column G)
         const onTimeDelivery = vendor[7]; // On-Time Delivery (Column H)
         const compliance = vendor[10]; // Compliance (Column K)
-        const rawScore = parseFloat(vendor[11]); // Raw Score (Column L)
-        const maxRawScore = parseFloat(vendor[12]); // Max Raw Score (Column M)
         const finalScore = parseFloat(vendor[13]); // Final Score (Column N)
 
         // Generate the response
@@ -660,7 +683,6 @@ function askChatbot() {
             <p><strong>First Time Pass:</strong> ${firstTimePass}</p>
             <p><strong>On-Time Delivery:</strong> ${onTimeDelivery}%</p>
             <p><strong>Compliance:</strong> ${compliance}</p>
-            <p><strong>Raw Score:</strong> ${rawScore}/${maxRawScore}</p>
             <p><strong>Final Score:</strong> ${finalScore.toFixed(2)}</p>
         `;
 
@@ -730,8 +752,6 @@ function displayTopVendors(data) {
         firstTimePass: row[6], // First Time Pass
         onTimeDelivery: row[7], // On-Time Delivery
         compliance: row[10], // Compliance
-        rawScore: parseFloat(row[11]), // Raw Score (Column L)
-        maxRawScore: parseFloat(row[12]), // Max Raw Score (Column M)
         score: parseFloat(row[13]) // Final Score (Column N)
     }));
 
@@ -751,8 +771,7 @@ function displayTopVendors(data) {
         // Assign rank based on the index (which is sorted)
         card.innerHTML = `
             <h3>Rank: ${index + 1} - ${vendor.name}</h3>
-            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Final Score:</strong> ${vendor.score.toFixed(2)}</p>
-            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Raw Score:</strong> ${vendor.rawScore}/${vendor.maxRawScore}</p>
+            <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Vendor Performance Score:</strong> ${vendor.score.toFixed(2)}</p>
             <p><strong>Location:</strong> ${vendor.location}</p>
             <p><strong>Categories:</strong> ${vendor.categories}</p>
             <p><strong>Average Purchase Price:</strong> ${vendor.averagePurchasePrice}</p>
@@ -792,21 +811,15 @@ function showBestVendor() {
         return;
     }
 
-    if (!location) {
-        suggestionsDiv.innerHTML = "<p>Please select a location.</p>";
-        return;
-    }
-
-    // Map KPI to the corresponding column index
+    // Corrected KPI column mapping
     const kpiColumnMap = {
-        otif: 7,              // OTIF (Column H)
-        onTimeDelivery: 8,    // On-Time Delivery% (Column I)
+        otif: 8,              // OTIF (Column I)
+        onTimeDelivery: 7,    // On-Time Delivery% (Column H)
         orderFulfillment: 9,  // Order Fulfillment (Column J)
         firstTimePass: 6,     // First Time Pass (Column G)
         dhu: 5,               // DHU (Column F)
         compliance: 10,       // Compliance (Column K)
-        priceAdvantage: 4,    // Price Advantage (Column E)
-        averagePurchasePrice: 3 // Average Purchase Price (Column D)
+        priceAdvantage: 4     // Price Advantage (Column E)
     };
 
     const kpiIndex = kpiColumnMap[kpi];
@@ -814,11 +827,11 @@ function showBestVendor() {
     // Filter vendors based on the selected range and location
     const filteredVendors = vendorList.filter(vendor => {
         const kpiValue = parseFloat(vendor[kpiIndex]);
-        return kpiValue <= range && vendor[1] === location; // Match location and range
+        return kpiValue <= range && (location === "all" || vendor[1] === location); // Match location or "all"
     });
 
     if (filteredVendors.length === 0) {
-        suggestionsDiv.innerHTML = `<p>No vendors found in ${location} below ${range}% for the selected KPI.</p>`;
+        suggestionsDiv.innerHTML = `<p>No vendors found ${location === "all" ? "" : `in ${location}`} below ${range}% for the selected KPI.</p>`;
         return;
     }
 
@@ -829,9 +842,16 @@ function showBestVendor() {
 
     // Display the best vendor
     suggestionsDiv.innerHTML = `
-        <p>Best vendor for ${kpi} in ${location} below ${range}%: <strong>${bestVendor[0]}</strong> (${bestVendor[kpiIndex]})</p>
+        <p>Best vendor for ${kpi.charAt(0).toUpperCase() + kpi.slice(1)} ${location === "all" ? "" : `in ${location}`} below ${range}: 
+        <strong>${bestVendor[0]}</strong> (${bestVendor[kpiIndex]}) 
+        from <strong>${bestVendor[1]}</strong>.</p>
     `;
 }
+
+function toggleProjectScope() {
+        const modal = document.getElementById("projectScopeModal");
+        modal.classList.toggle("hidden");
+    }
     </script>
 </body>
 </html>
