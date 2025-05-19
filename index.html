@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <style>
         .hidden { display: none; }
         .styled-dropdown {
@@ -247,13 +248,147 @@
             cursor: pointer;
             margin-left: 10px;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease, transform 0.2s ease;
+            transition: background-color 0.3s, transform 0.2s;
+            position: relative;
+            z-index: 2;
         }
 
-        .info-button:hover {
+        .info-button:hover, .info-button:focus {
             background-color: #0056b3;
             transform: scale(1.1);
         }
+
+        .project-scope-tooltip {
+            display: block;
+            position: absolute;
+            top: 35px;
+            right: 0; /* Changed from left: 0 to right: 0 */
+            min-width: 320px;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+            padding: 16px 20px 16px 20px;
+            z-index: 1001;
+            text-align: left;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .info-tooltip-wrapper:hover .project-scope-tooltip,
+        .info-tooltip-wrapper:focus-within .project-scope-tooltip,
+        .project-scope-tooltip.show {
+            opacity: 1;
+            pointer-events: auto;
+            display: block;
+        }
+
+        .project-scope-tooltip.hidden {
+            opacity: 0;
+            pointer-events: none;
+            display: block;
+        }
+
+        .login-icon-link {
+            margin-left: 18px;
+            vertical-align: middle;
+            display: inline-flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        .login-icon-combo {
+            display: flex;
+            align-items: center;
+            background: #fff;
+            border-radius: 22px;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+            border: 2px solid #007bff;
+            padding: 2px 8px 2px 6px;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+        .login-blue-bg {
+            background: #007bff !important;
+            border: 2px solid #007bff !important;
+            box-shadow: 0 2px 8px rgba(0,123,255,0.12);
+        }
+        .login-icon-bg {
+            background: transparent;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            margin-right: 6px;
+        }
+        .login-icon-bg-white {
+            background: transparent !important;
+        }
+        .login-icon-bg .login-icon-white {
+            color: #fff !important;
+            font-size: 20px;
+            background: transparent;
+        }
+        .login-icon-text {
+            font-size: 13px;
+            color: #007bff;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            background: transparent;
+            border-radius: 8px;
+            padding: 0 2px;
+            transition: color 0.2s;
+            border: none;
+            margin-left: 0;
+        }
+        .login-text-white {
+            color: #fff !important;
+        }
+        .login-highlight {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        .login-icon-link:hover .login-icon-combo,
+        .login-icon-link:focus .login-icon-combo {
+            box-shadow: 0 4px 16px rgba(0,123,255,0.18);
+            border-color: #0056b3;
+        }
+        .login-icon-link:hover .login-icon-text,
+        .login-icon-link:focus .login-icon-text {
+            color: #fff !important;
+            text-decoration: underline;
+        }
+        .header-right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0;
+}
+.user-info {
+    display: inline-flex;
+    align-items: center;
+}
+.header-right .notifications {
+    margin-left: 10px !important; /* restore original spacing */
+    margin-right: 0;
+    order: unset; /* restore default order */
+    display: inline-block;
+    vertical-align: middle;
+}
+.header-right .notifications a {
+    margin-left: 0;
+    display: inline-block;
+    vertical-align: middle;
+}
+.header-right .notifications .mail-icon {
+    font-size: 22px;
+    color: #007bff;
+    margin-left: 0;
+    margin-right: 0;
+    /* If you want to use a FontAwesome icon, you can add it here */
+}
     </style>
 </head>
 <body>
@@ -272,16 +407,35 @@
                 <h1>Vendor Performance Management</h1>
             </div>
             <div class="header-right">
-                <div class="user-info">
-                    <span>Welcome, <strong> Ananya </strong></span>
-                    <button class="info-button" onclick="toggleProjectScope()">ℹ</button> <!-- Info icon -->
-                </div>
-                <div class="notifications">
-                    <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" title="Mail">
-                        <i class="mail-icon" title="Mail"></i>
-                    </a>
-                </div>
+    <div class="user-info" style="position: relative;">
+        <span>Welcome, <strong> Ananya </strong></span>
+        <div class="info-tooltip-wrapper" style="display: inline-block; position: relative;">
+            <button class="info-button" id="infoBtn" tabindex="0">ℹ</button>
+            <div id="projectScopeTooltip" class="project-scope-tooltip hidden" style="color: #007bff;">
+                <h3 style="margin-top: 0; color: #007bff; font-size: 18px;">Project Scope</h3>
+                <ul style="list-style-type: disc; padding-left: 20px; text-align: left;">
+                    <li>This dashboard and evaluation system is designed specifically for:</li>
+                    <li>The brand: Mast & Harbour (M&amp;H)</li>
+                    <li>Men’s Crew Neck T-Shirts only</li>
+                    <li>Focus on Single Jersey and Interlock fabric types (commonly used in T-shirts)</li>
+                </ul>
             </div>
+        </div>
+        <a href="login.html" title="Login" class="login-icon-link" style="margin-left:12px;">
+            <span class="login-icon-combo login-blue-bg">
+                <span class="login-icon-bg login-icon-bg-white">
+                    <i class="fa-solid fa-user-circle login-icon-white"></i>
+                </span>
+                <span class="login-icon-text login-highlight login-text-white">Login</span>
+            </span>
+        </a>
+    </div>
+    <div class="notifications">
+        <a href="https://mail.google.com/mail/u/0/?tab=rm&ogbl#inbox" title="Mail" style="margin-left: 0;">
+            <i class="mail-icon fa-solid fa-envelope" title="Mail"></i>
+        </a>
+    </div>
+</div>
         </header>
 
         <!-- Vendor Cards Dashboard -->
@@ -403,18 +557,6 @@
         <button class="styled-button" onclick="clearChatbotResponse()">Clear</button> <!-- Clear Button -->
     </div>
 
-    <!-- Modal for Project Scope -->
-<div id="projectScopeModal" class="hidden" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background-color: white; border: 1px solid #ddd; border-radius: 10px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3); padding: 20px; width: 400px; z-index: 1000;">
-    <h3 style="margin-top: 0; color: #007bff;">Project Scope</h3>
-    <ul style="list-style-type: disc; padding-left: 20px;">
-        <li>Brand: Mast & Harbour</li>
-        <li>Category: Men's Crew Neck T-Shirts</li>
-        <li>Fabric Focus: Single Jersey and Interlock only</li>
-        <li>Other styles or categories are not included in this pilot version.</li>
-    </ul>
-    <button class="styled-button" onclick="toggleProjectScope()">Close</button>
-</div>
-
     <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
@@ -526,7 +668,7 @@
                 <td>${vendor2[1]}</td>
             </tr>
             <tr>
-                <td>Average Purchase Price</td>
+                <td>Average Purchase Price (in Rs(₹))</td>
                 <td>${vendor1[3]}</td>
                 <td>${vendor2[3]}</td>
             </tr>
@@ -622,7 +764,7 @@
             <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Vendor Performance Score:</strong> ${vendor.score.toFixed(2)}</p>
             <p><strong>Location:</strong> ${vendor.location}</p>
             <p><strong>Categories:</strong> ${vendor.categories}</p>
-            <p><strong>Average Purchase Price:</strong> ${vendor.averagePurchasePrice}</p>
+            <p><strong>Average Purchase Price (in Rs(₹)):</strong> ${vendor.averagePurchasePrice}</p>
             <p><strong>Price Advantage:</strong> ${vendor.priceAdvantage}</p>
             <p><strong>DHU:</strong> ${vendor.dhu}</p>
             <p><strong>First Time Pass:</strong> ${vendor.firstTimePass}</p>
@@ -774,7 +916,7 @@ function displayTopVendors(data) {
             <p style="background-color: #F6CFFC; padding: 5px; border-radius: 5px;"><strong>Vendor Performance Score:</strong> ${vendor.score.toFixed(2)}</p>
             <p><strong>Location:</strong> ${vendor.location}</p>
             <p><strong>Categories:</strong> ${vendor.categories}</p>
-            <p><strong>Average Purchase Price:</strong> ${vendor.averagePurchasePrice}</p>
+            <p><strong>Average Purchase Price (in Rs(₹)):</strong> ${vendor.averagePurchasePrice}</p>
             <p><strong>Price Advantage:</strong> ${vendor.priceAdvantage}</p>
             <p><strong>DHU:</strong> ${vendor.dhu}</p>
             <p><strong>First Time Pass:</strong> ${vendor.firstTimePass}</p>
@@ -852,6 +994,18 @@ function toggleProjectScope() {
         const modal = document.getElementById("projectScopeModal");
         modal.classList.toggle("hidden");
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const infoBtn = document.getElementById("infoBtn");
+        const tooltip = document.getElementById("projectScopeTooltip");
+
+        // Show tooltip on hover/focus
+        infoBtn.addEventListener("mouseenter", () => tooltip.classList.remove("hidden"));
+        infoBtn.addEventListener("focus", () => tooltip.classList.remove("hidden"));
+        // Hide tooltip on mouseleave/blur
+        infoBtn.addEventListener("mouseleave", () => tooltip.classList.add("hidden"));
+        infoBtn.addEventListener("blur", () => tooltip.classList.add("hidden"));
+    });
     </script>
 </body>
 </html>
